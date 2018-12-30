@@ -26,7 +26,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>com.github.immueggpain.exampleproj.example_proj</mainClass>
+							<mainClass>com.github.immueggpain.bettermultiplayer.Launcher</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
