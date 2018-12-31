@@ -12,12 +12,9 @@ public class Launcher {
 	private static final String VERSTR = "0.1.0";
 
 	public static class ClientSettings {
-		public String local_listen_ip;
-		public int local_listen_port;
 		public String server_ip;
 		public int server_port;
 		public String password;
-		public String logfile;
 	}
 
 	public static class ServerSettings {
@@ -41,10 +38,7 @@ public class Launcher {
 		// option long names
 		String help = "help";
 		String mode = "mode";
-		String log = "log";
 		String password = "password";
-		String local_listen_ip = "local_listen_ip";
-		String local_listen_port = "local_listen_port";
 		String server_ip = "server_ip";
 		String server_port = "server_port";
 		String cert = "cert";
@@ -55,14 +49,8 @@ public class Launcher {
 		options.addOption("h", help, false, "print help then exit");
 		options.addOption(Option.builder("m").longOpt(mode).hasArg().desc("mode, server or client, default is client")
 				.argName("MODE").build());
-		options.addOption(Option.builder("l").longOpt(log).hasArg().desc("log file path. default is smartproxy.log")
-				.argName("PATH").build());
 		options.addOption(Option.builder("w").longOpt(password).hasArg()
 				.desc("password of server or client, must be same, recommend 64 bytes").argName("PASSWORD").build());
-		options.addOption(
-				Option.builder("i").longOpt(local_listen_ip).hasArg().desc("local listening ip").argName("IP").build());
-		options.addOption(Option.builder("n").longOpt(local_listen_port).hasArg().desc("local listening port")
-				.argName("PORT").build());
 		options.addOption(Option.builder("s").longOpt(server_ip).hasArg().desc("server ip").argName("IP").build());
 		options.addOption(
 				Option.builder("p").longOpt(server_port).hasArg().desc("server port").argName("PORT").build());
@@ -101,12 +89,9 @@ public class Launcher {
 		} else {
 			// run as client
 			ClientSettings settings = new ClientSettings();
-			settings.local_listen_ip = cmd.getOptionValue(local_listen_ip, "127.0.0.1");
-			settings.local_listen_port = Integer.parseInt(cmd.getOptionValue(local_listen_port, "1083"));
 			settings.server_ip = cmd.getOptionValue(server_ip);
 			settings.server_port = Integer.parseInt(cmd.getOptionValue(server_port));
 			settings.password = cmd.getOptionValue(password);
-			settings.logfile = cmd.getOptionValue(log, "smartproxy.log");
 			try {
 				new BMPClient().run(settings);
 			} catch (Exception e) {
