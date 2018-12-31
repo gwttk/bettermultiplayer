@@ -1,5 +1,6 @@
 package com.github.immueggpain.bettermultiplayer;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -51,6 +52,7 @@ public class BMPClient {
 					() -> transfer_s2c(cserver_s, decrypter, secretKey, loopback_addr, local_ovpn_port, sovpn_s));
 
 			// start ovpn
+			startOvpnProcess(local_listen_port, settings.tap_ip, settings.tap_mask);
 
 			transfer_c2s_thread.join();
 			transfer_s2c_thread.join();
@@ -113,6 +115,13 @@ public class BMPClient {
 		decrypter.init(Cipher.DECRYPT_MODE, secretKey, gcmParameterSpec);
 		byte[] decryptedBytes = decrypter.doFinal(input, offset + 12, length - 12);
 		return decryptedBytes;
+	}
+
+	private static void startOvpnProcess(int local_listen_port, String tap_ip, String tap_mask)
+			throws IOException, InterruptedException {
+		Process process = new ProcessBuilder("ovpn\\openvpn.exe", "--dev", "tap", "--remote", "127.0.0.1",
+				String.valueOf(local_listen_port), "udp", "--ifconfig", tap_ip, tap_mask).inheritIO().start();
+		process.waitFor();
 	}
 
 }

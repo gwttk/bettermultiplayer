@@ -15,6 +15,8 @@ public class Launcher {
 		public String server_ip;
 		public int server_port;
 		public String password;
+		public String tap_ip;
+		public String tap_mask;
 	}
 
 	public static class ServerSettings {
@@ -43,6 +45,8 @@ public class Launcher {
 		String server_port = "server_port";
 		String cert = "cert";
 		String private_key = "private_key";
+		String tap_ip = "tap_ip";
+		String tap_mask = "tap_mask";
 
 		// define options
 		Options options = new Options();
@@ -58,6 +62,10 @@ public class Launcher {
 				.desc("SSL cert chain file path. default is fullchain.pem").argName("PATH").build());
 		options.addOption(Option.builder("k").longOpt(private_key).hasArg()
 				.desc("SSL private key file path. default is privkey.pem").argName("PATH").build());
+		options.addOption(
+				Option.builder("i").longOpt(tap_ip).hasArg().desc("IP of your new virtual LAN").argName("IP").build());
+		options.addOption(Option.builder("a").longOpt(tap_mask).hasArg().desc("IP mask of your new virtual LAN")
+				.argName("IP MASK").build());
 
 		// parse from cmd args
 		DefaultParser parser = new DefaultParser();
@@ -92,6 +100,8 @@ public class Launcher {
 			settings.server_ip = cmd.getOptionValue(server_ip);
 			settings.server_port = Integer.parseInt(cmd.getOptionValue(server_port));
 			settings.password = cmd.getOptionValue(password);
+			settings.tap_ip = cmd.getOptionValue(tap_ip);
+			settings.tap_mask = cmd.getOptionValue(tap_mask);
 			try {
 				new BMPClient().run(settings);
 			} catch (Exception e) {
