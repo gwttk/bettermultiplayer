@@ -1,0 +1,16 @@
+openvpn server config files in /etc/openvpn/
+but we don't use it, we just use command line args
+
+here is how to setup server:
+
+// setup interfaces
+openvpn --mktun --dev tap0
+openvpn --mktun --dev tap1
+ip link set dev tap0 up
+ip link set dev tap1 up
+brctl addbr br0
+brctl addif br0 tap0 tap1
+ip link set dev br0 up
+// run openvpn
+openvpn --dev tap0 --lport 23333
+openvpn --dev tap1 --lport 23334
