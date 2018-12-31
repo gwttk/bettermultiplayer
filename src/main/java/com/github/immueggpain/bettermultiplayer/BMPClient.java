@@ -24,17 +24,22 @@
 package com.github.immueggpain.bettermultiplayer;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.Key;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
 import com.github.immueggpain.bettermultiplayer.Launcher.ClientSettings;
@@ -42,6 +47,8 @@ import com.github.immueggpain.bettermultiplayer.Launcher.ClientSettings;
 public class BMPClient {
 
 	public void run(ClientSettings settings) {
+		// check if tap interface is up
+
 		// send a check udp packet to server
 		// server respond, so make sure server is running & aes is correct
 
@@ -50,6 +57,19 @@ public class BMPClient {
 		// 1 thread recv cserver, send with sovpn to ovpn
 		// start ovpn process
 		try {
+			// check tap device
+			if (!hasTapAdapter()) {
+				System.out.println("Please intall tap adapter");
+				Process process = new ProcessBuilder("ovpn\\tap-windows.exe").inheritIO().start();
+				int exitCode = process.waitFor();
+				if (exitCode != 0) {
+					System.err.println("install failed! exit code: " + exitCode);
+					return;
+				}
+				// wait a sec
+				Thread.sleep(1000);
+			}
+
 			// convert password to aes key
 			byte[] bytes = settings.password.getBytes(StandardCharsets.UTF_8);
 			byte[] byteKey = new byte[16];
@@ -76,6 +96,7 @@ public class BMPClient {
 
 			// start ovpn
 			startOvpnProcess(local_listen_port, settings.tap_ip, settings.tap_mask);
+			System.out.println("press ctrl+c again to exit!");
 
 			transfer_c2s_thread.join();
 			transfer_s2c_thread.join();
@@ -145,6 +166,16 @@ public class BMPClient {
 		Process process = new ProcessBuilder("ovpn\\openvpn.exe", "--dev", "tap", "--remote", "127.0.0.1",
 				String.valueOf(local_listen_port), "udp", "--ifconfig", tap_ip, tap_mask).inheritIO().start();
 		process.waitFor();
+	}
+
+	private static boolean hasTapAdapter() throws IOException, InterruptedException {
+		Process process = new ProcessBuilder("ovpn\\openvpn.exe", "--show-adapters").redirectErrorStream(true).start();
+		InputStream is = process.getInputStream();
+		String output = IOUtils.toString(is, Charset.defaultCharset());
+		process.waitFor();
+		Pattern checkRegex = Pattern.compile("'.+' \\{.+\\}");
+		Matcher m = checkRegex.matcher(output);
+		return m.find();
 	}
 
 }
