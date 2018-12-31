@@ -19,13 +19,13 @@ import com.github.immueggpain.bettermultiplayer.Launcher.ClientSettings;
 public class BMPClient {
 
 	public void run(ClientSettings settings) {
-		// TODO Auto-generated method stub
 		// send a check udp packet to server
 		// server respond, so make sure server is running & aes is correct
 
 		// create sovpn udp socket & cserver udp socket
 		// 1 thread recv sovpn, send with cserver to server
 		// 1 thread recv cserver, send with sovpn to ovpn
+		// start ovpn process
 		try {
 			// convert password to aes key
 			byte[] bytes = settings.password.getBytes(StandardCharsets.UTF_8);
@@ -100,7 +100,7 @@ public class BMPClient {
 		}
 	}
 
-	private static byte[] encrypt(Cipher encrypter, Key secretKey, byte[] input, int offset, int length)
+	public static byte[] encrypt(Cipher encrypter, Key secretKey, byte[] input, int offset, int length)
 			throws GeneralSecurityException {
 		// we need init every time because we want random iv
 		encrypter.init(Cipher.ENCRYPT_MODE, secretKey);
@@ -109,7 +109,7 @@ public class BMPClient {
 		return ArrayUtils.addAll(iv, encrypedBytes);
 	}
 
-	private static byte[] decrypt(Cipher decrypter, Key secretKey, byte[] input, int offset, int length)
+	public static byte[] decrypt(Cipher decrypter, Key secretKey, byte[] input, int offset, int length)
 			throws GeneralSecurityException {
 		GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(128, input, offset, 12);
 		decrypter.init(Cipher.DECRYPT_MODE, secretKey, gcmParameterSpec);
