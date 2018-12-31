@@ -12,5 +12,8 @@ brctl addbr br0
 brctl addif br0 tap0 tap1
 ip link set dev br0 up
 // run openvpn
-openvpn --dev tap0 --lport 23333
-openvpn --dev tap1 --lport 23334
+openvpn --dev tap0 --local 127.0.0.1 --lport 23343
+openvpn --dev tap1 --local 127.0.0.1 --lport 23344
+
+java -jar bettermultiplayer-0.1.0.jar -m server -o 23343 -p 23333 -w imnotgay233
+java -jar bettermultiplayer-0.1.0.jar -m server -o 23344 -p 23334 -w imnotgay233
