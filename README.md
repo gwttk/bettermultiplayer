@@ -2,7 +2,7 @@
 * Make sure you have **[Java](https://jdk.java.net/11/) 8+** installed
 * [Download latest build](https://github.com/Immueggpain/bettermultiplayer/releases). Unzip it
 * Run `java -jar bettermultiplayer-x.x.x.jar --help` to get help.
-* Run client `java -jar .\bettermultiplayer-0.1.0.jar -m client -i <virtual_ip> -a <virtual_mask> -s <server_ip> -p <server_port> -w <password>`.
+* Run client `java -jar .\bettermultiplayer-x.x.x.jar -m client -i <virtual_ip> -a <virtual_mask> -s <server_ip> -p <server_port> -w <password>`.
 * Enjoy!
 
 ## QuickStart for Server
