@@ -8,7 +8,6 @@ import javax.crypto.spec.GCMParameterSpec;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-/** scmt = shortcut for multi-threading */
 public final class Util {
 
 	/** good to use */
