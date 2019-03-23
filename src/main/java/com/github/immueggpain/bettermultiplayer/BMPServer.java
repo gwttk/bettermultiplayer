@@ -26,6 +26,7 @@ package com.github.immueggpain.bettermultiplayer;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 
@@ -77,8 +78,7 @@ public class BMPServer {
 			while (true) {
 				p.setData(recvBuf);
 				sclient_s.receive(p);
-				contxt.client_addr = p.getAddress();
-				contxt.client_port = p.getPort();
+				contxt.client_sockaddr = p.getSocketAddress();
 				byte[] decrypted = Util.decrypt(decrypter, secretKey, p.getData(), p.getOffset(), p.getLength());
 				p.setData(decrypted);
 				p.setAddress(loopback_addr);
@@ -98,12 +98,11 @@ public class BMPServer {
 			while (true) {
 				p.setData(recvBuf);
 				covpn_s.receive(p);
-				if (contxt.client_addr == null)
+				if (contxt.client_sockaddr == null)
 					continue;
 				byte[] encrypted = Util.encrypt(encrypter, secretKey, p.getData(), p.getOffset(), p.getLength());
 				p.setData(encrypted);
-				p.setAddress(contxt.client_addr);
-				p.setPort(contxt.client_port);
+				p.setSocketAddress(contxt.client_sockaddr);
 				sclient_s.send(p);
 			}
 		} catch (Exception e) {
@@ -112,8 +111,7 @@ public class BMPServer {
 	}
 
 	private static class TunnelContext {
-		public InetAddress client_addr;
-		public int client_port;
+		public SocketAddress client_sockaddr;
 	}
 
 }
