@@ -30,17 +30,14 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
-import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 
 import com.github.immueggpain.bettermultiplayer.Launcher.ClientSettings;
 
@@ -89,9 +86,9 @@ public class BMPClient {
 			DatagramSocket cserver_s = new DatagramSocket();
 
 			// start working threads
-			Thread transfer_c2s_thread = scmt.execAsync("transfer_c2s",
+			Thread transfer_c2s_thread = Util.execAsync("transfer_c2s",
 					() -> transfer_c2s(sovpn_s, encrypter, secretKey, server_addr, settings.server_port, cserver_s));
-			Thread transfer_s2c_thread = scmt.execAsync("transfer_s2c",
+			Thread transfer_s2c_thread = Util.execAsync("transfer_s2c",
 					() -> transfer_s2c(cserver_s, decrypter, secretKey, loopback_addr, local_ovpn_port, sovpn_s));
 
 			// start ovpn
@@ -103,7 +100,6 @@ public class BMPClient {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	private static void transfer_c2s(DatagramSocket sovpn_s, Cipher encrypter, Key secretKey, InetAddress server_addr,
@@ -114,7 +110,7 @@ public class BMPClient {
 			while (true) {
 				p.setData(recvBuf);
 				sovpn_s.receive(p);
-				byte[] encrypted = encrypt(encrypter, secretKey, p.getData(), p.getOffset(), p.getLength());
+				byte[] encrypted = Util.encrypt(encrypter, secretKey, p.getData(), p.getOffset(), p.getLength());
 				p.setData(encrypted);
 				p.setAddress(server_addr);
 				p.setPort(server_port);
@@ -133,7 +129,7 @@ public class BMPClient {
 			while (true) {
 				p.setData(recvBuf);
 				cserver_s.receive(p);
-				byte[] decrypted = decrypt(decrypter, secretKey, p.getData(), p.getOffset(), p.getLength());
+				byte[] decrypted = Util.decrypt(decrypter, secretKey, p.getData(), p.getOffset(), p.getLength());
 				p.setData(decrypted);
 				p.setAddress(loopback_addr);
 				p.setPort(local_ovpn_port);
@@ -142,23 +138,6 @@ public class BMPClient {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	public static byte[] encrypt(Cipher encrypter, Key secretKey, byte[] input, int offset, int length)
-			throws GeneralSecurityException {
-		// we need init every time because we want random iv
-		encrypter.init(Cipher.ENCRYPT_MODE, secretKey);
-		byte[] iv = encrypter.getIV();
-		byte[] encrypedBytes = encrypter.doFinal(input, offset, length);
-		return ArrayUtils.addAll(iv, encrypedBytes);
-	}
-
-	public static byte[] decrypt(Cipher decrypter, Key secretKey, byte[] input, int offset, int length)
-			throws GeneralSecurityException {
-		GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(128, input, offset, 12);
-		decrypter.init(Cipher.DECRYPT_MODE, secretKey, gcmParameterSpec);
-		byte[] decryptedBytes = decrypter.doFinal(input, offset + 12, length - 12);
-		return decryptedBytes;
 	}
 
 	private static void startOvpnProcess(int local_listen_port, String tap_ip, String tap_mask)

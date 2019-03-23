@@ -57,9 +57,9 @@ public class BMPServer {
 
 			// start working threads
 			TunnelContext contxt = new TunnelContext();
-			Thread transfer_c2s_thread = scmt.execAsync("transfer_c2s", () -> transfer_c2s(sclient_s, decrypter,
+			Thread transfer_c2s_thread = Util.execAsync("transfer_c2s", () -> transfer_c2s(sclient_s, decrypter,
 					secretKey, loopback_addr, local_ovpn_port, covpn_s, contxt));
-			Thread transfer_s2c_thread = scmt.execAsync("transfer_s2c",
+			Thread transfer_s2c_thread = Util.execAsync("transfer_s2c",
 					() -> transfer_s2c(covpn_s, encrypter, secretKey, sclient_s, contxt));
 
 			transfer_c2s_thread.join();
@@ -79,7 +79,7 @@ public class BMPServer {
 				sclient_s.receive(p);
 				contxt.client_addr = p.getAddress();
 				contxt.client_port = p.getPort();
-				byte[] decrypted = BMPClient.decrypt(decrypter, secretKey, p.getData(), p.getOffset(), p.getLength());
+				byte[] decrypted = Util.decrypt(decrypter, secretKey, p.getData(), p.getOffset(), p.getLength());
 				p.setData(decrypted);
 				p.setAddress(loopback_addr);
 				p.setPort(local_ovpn_port);
@@ -100,7 +100,7 @@ public class BMPServer {
 				covpn_s.receive(p);
 				if (contxt.client_addr == null)
 					continue;
-				byte[] encrypted = BMPClient.encrypt(encrypter, secretKey, p.getData(), p.getOffset(), p.getLength());
+				byte[] encrypted = Util.encrypt(encrypter, secretKey, p.getData(), p.getOffset(), p.getLength());
 				p.setData(encrypted);
 				p.setAddress(contxt.client_addr);
 				p.setPort(contxt.client_port);
