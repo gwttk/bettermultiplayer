@@ -32,7 +32,7 @@ import org.apache.commons.cli.ParseException;
 
 public class Launcher {
 
-	private static final String VERSTR = "0.2.0";
+	private static final String VERSTR = "0.3.0";
 
 	public static class ClientSettings {
 		public String server_ip;
