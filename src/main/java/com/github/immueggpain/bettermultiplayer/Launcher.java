@@ -7,7 +7,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
 
 @Command(description = "Toolkit written in java.", name = "javatool", mixinStandardHelpOptions = true,
-		version = Launcher.VERSTR, subcommands = { HelpCommand.class, Hash.class })
+		version = Launcher.VERSTR, subcommands = { HelpCommand.class, BMPUDPHub.class, BMPPeer.class })
 public class Launcher implements Callable<Void> {
 
 	public static final String VERSTR = "1.2.0";
