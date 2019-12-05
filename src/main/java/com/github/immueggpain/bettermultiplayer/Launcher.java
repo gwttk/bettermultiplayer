@@ -43,9 +43,7 @@ public class Launcher {
 	}
 
 	public static class ServerSettings {
-		public String password;
 		public int server_port;
-		public int local_ovpn_port;
 	}
 
 	public static void main(String[] args) {
@@ -105,12 +103,10 @@ public class Launcher {
 		if (cmd.hasOption(mode) && cmd.getOptionValue(mode).equals("server")) {
 			// run as server
 			ServerSettings settings = new ServerSettings();
-			settings.password = cmd.getOptionValue(password);
 			settings.server_port = Integer.parseInt(cmd.getOptionValue(server_port));
-			settings.local_ovpn_port = Integer.parseInt(cmd.getOptionValue(local_ovpn_port));
 			try {
-				new BMPServer().run(settings);
-			} catch (Exception e) {
+				new BMPUDPHub().run(settings);
+			} catch (Throwable e) {
 				e.printStackTrace();
 			}
 			return;
@@ -124,7 +120,7 @@ public class Launcher {
 			settings.tap_mask = cmd.getOptionValue(tap_mask);
 			try {
 				new BMPClient().run(settings);
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				e.printStackTrace();
 			}
 		}
