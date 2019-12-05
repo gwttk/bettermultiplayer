@@ -3,8 +3,6 @@ before_install:
     - pyenv versions
     - pyenv shell 3.7.1
     - pip3 -V
-    - sudo apt-get install -y python3-pip
-    - pip3 -V
     - pip3 install --upgrade pip
     - pip3 -V
 before_deploy:
@@ -12,7 +10,7 @@ before_deploy:
     - PROJ_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
     - ARTIFACTID=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
     # install PyGithub
-    - sudo pip3 install PyGithub
+    - pip3 install PyGithub
     # download githubrelease.py
     - wget https://raw.githubusercontent.com/Immueggpain/citools/master/githubrelease.py
     - pwd
