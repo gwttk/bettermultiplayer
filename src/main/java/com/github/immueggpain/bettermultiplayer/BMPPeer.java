@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
+import com.sun.jna.platform.win32.Advapi32Util;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -30,9 +31,21 @@ public class BMPPeer implements Callable<Void> {
 
 	@Override
 	public Void call() throws Exception {
+		// check admin privilege
+		boolean isAdmin = isWinAdmin();
+		System.out.println("is admin? " + isAdmin);
+
 		// check tap device
 		if (!hasTapAdapter()) {
 			// make sure tap driver/adapter is installed!
+
+			// check if we have admin rights
+			if (!isAdmin) {
+				System.err.println("can't install tap adapter driver!");
+				System.err.println("please re-run with admin privilege!");
+				return null;
+			}
+
 			System.out.println("Please intall tap adapter");
 			Process process = new ProcessBuilder("ovpn\\tap-windows.exe").inheritIO().start();
 			int exitCode = process.waitFor();
@@ -45,18 +58,19 @@ public class BMPPeer implements Callable<Void> {
 			}
 			// wait a sec
 			Thread.sleep(1000);
-
-			// setup udp redirect
-			Thread recvOvpnThread = Util.execAsync("recv_ovpn_thread", () -> recv_ovpn_thread(Launcher.LOCAL_PORT));
-			Thread recvServerThread = Util.execAsync("recv_server_thread",
-					() -> recv_server_thread(Launcher.LOCAL_OVPN_PORT));
-
-			// start ovpn
-			startOvpnProcess(Launcher.LOCAL_PORT);
-
-			recvOvpnThread.join();
-			recvServerThread.join();
 		}
+
+		// setup udp redirect
+		Thread recvOvpnThread = Util.execAsync("recv_ovpn_thread", () -> recv_ovpn_thread(Launcher.LOCAL_PORT));
+		Thread recvServerThread = Util.execAsync("recv_server_thread",
+				() -> recv_server_thread(Launcher.LOCAL_OVPN_PORT));
+
+		// start ovpn
+		startOvpnProcess(Launcher.LOCAL_PORT);
+
+		recvOvpnThread.join();
+		recvServerThread.join();
+
 		return null;
 	}
 
@@ -125,6 +139,16 @@ public class BMPPeer implements Callable<Void> {
 		Pattern checkRegex = Pattern.compile("'.+' \\{.+\\}");
 		Matcher m = checkRegex.matcher(output);
 		return m.find();
+	}
+
+	public static boolean isWinAdmin() throws IOException, InterruptedException {
+		Advapi32Util.Account[] groups = Advapi32Util.getCurrentUserGroups();
+		for (Advapi32Util.Account group : groups) {
+			if ("S-1-16-12288".equals(group.sidString)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
