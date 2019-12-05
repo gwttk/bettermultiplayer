@@ -11,6 +11,8 @@ import picocli.CommandLine.HelpCommand;
 public class Launcher implements Callable<Void> {
 
 	public static final String VERSTR = "1.2.0";
+	public static final int LOCAL_PORT = 2233;
+	public static final int LOCAL_OVPN_PORT = 1194;
 
 	public static void main(String[] args) {
 		int exitCode = new CommandLine(new Launcher()).setCaseInsensitiveEnumValuesAllowed(true).execute(args);
