@@ -6,9 +6,6 @@
 	<groupId>com.github.immueggpain</groupId>
 	<artifactId>bettermultiplayer</artifactId>
 	<version>0.2.0</version>
-	<packaging>jar</packaging>
-
-	<name>bettermultiplayer</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -131,6 +128,11 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.8</version>
+		</dependency>
+		<dependency>
+			<groupId>info.picocli</groupId>
+			<artifactId>picocli</artifactId>
+			<version>4.0.0-alpha-3</version>
 		</dependency>
 	</dependencies>
 </project>

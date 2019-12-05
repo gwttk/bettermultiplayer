@@ -8,10 +8,16 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.concurrent.Callable;
 
-import com.github.immueggpain.bettermultiplayer.Launcher.ServerSettings;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
-public class BMPUDPHub {
+@Command(description = "Start BMP server", name = "server", mixinStandardHelpOptions = true, version = Launcher.VERSTR)
+public class BMPUDPHub implements Callable<Void> {
+
+	@Option(names = { "-p", "--port" }, required = true, description = "listening port")
+	public int serverPort;
 
 	private static class Player {
 		/** time of the last packet received from this player */
@@ -22,17 +28,15 @@ public class BMPUDPHub {
 	private HashMap<InetSocketAddress, Player> activePlayers = new HashMap<>();
 	private DatagramSocket socket;
 
-	public void run(ServerSettings settings) {
-		try {
-			Thread recvThread = Util.execAsync("recv_thread", () -> recv_thread(settings.server_port));
-			Thread removeExpiredPlayerThread = Util.execAsync("remove_expired_player_thread",
-					() -> remove_expired_player_thread(settings.server_port));
+	@Override
+	public Void call() throws Exception {
+		Thread recvThread = Util.execAsync("recv_thread", () -> recv_thread(serverPort));
+		Thread removeExpiredPlayerThread = Util.execAsync("remove_expired_player_thread",
+				() -> remove_expired_player_thread());
 
-			recvThread.join();
-			removeExpiredPlayerThread.join();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		recvThread.join();
+		removeExpiredPlayerThread.join();
+		return null;
 	}
 
 	private void recv_thread(int listen_port) {
@@ -59,7 +63,7 @@ public class BMPUDPHub {
 	}
 
 	/** daemon cleaning expired players */
-	private void remove_expired_player_thread(int listen_port) {
+	private void remove_expired_player_thread() {
 		while (true) {
 			synchronized (activePlayers) {
 				long now = System.currentTimeMillis();

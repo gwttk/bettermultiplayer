@@ -29,7 +29,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,11 +38,9 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.io.IOUtils;
 
-import com.github.immueggpain.bettermultiplayer.Launcher.ClientSettings;
-
 public class BMPClient {
 
-	public void run(ClientSettings settings) {
+	public void run() {
 		// check if tap interface is up
 
 		// send a check udp packet to server
@@ -68,9 +65,7 @@ public class BMPClient {
 			}
 
 			// convert password to aes key
-			byte[] bytes = settings.password.getBytes(StandardCharsets.UTF_8);
 			byte[] byteKey = new byte[16];
-			System.arraycopy(bytes, 0, byteKey, 0, Math.min(byteKey.length, bytes.length));
 			SecretKeySpec secretKey = new SecretKeySpec(byteKey, "AES");
 			// we use 2 ciphers because we want to support encrypt/decrypt full-duplex
 			String transformation = "AES/GCM/PKCS5Padding";
@@ -78,7 +73,6 @@ public class BMPClient {
 			Cipher decrypter = Cipher.getInstance(transformation);
 
 			// setup sockets
-			InetAddress server_addr = InetAddress.getByName(settings.server_ip);
 			InetAddress loopback_addr = InetAddress.getByName("127.0.0.1");
 			int local_ovpn_port = 1194;
 			int local_listen_port = 1195;
@@ -86,16 +80,12 @@ public class BMPClient {
 			DatagramSocket cserver_s = new DatagramSocket();
 
 			// start working threads
-			Thread transfer_c2s_thread = Util.execAsync("transfer_c2s",
-					() -> transfer_c2s(sovpn_s, encrypter, secretKey, server_addr, settings.server_port, cserver_s));
 			Thread transfer_s2c_thread = Util.execAsync("transfer_s2c",
 					() -> transfer_s2c(cserver_s, decrypter, secretKey, loopback_addr, local_ovpn_port, sovpn_s));
 
 			// start ovpn
-			startOvpnProcess(local_listen_port, settings.tap_ip, settings.tap_mask);
 			System.out.println("press ctrl+c again to exit!");
 
-			transfer_c2s_thread.join();
 			transfer_s2c_thread.join();
 		} catch (Exception e) {
 			e.printStackTrace();
