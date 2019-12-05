@@ -1,6 +1,7 @@
 language: java
 before_install:
     - pyenv versions
+    - pyenv shell 3.7.1
     - pip3 -V
     - sudo apt-get install -y python3-pip
     - pip3 -V
