@@ -127,7 +127,7 @@ public class BMPPeer implements Callable<Void> {
 
 	private static void startOvpnProcess(int local_listen_port) throws IOException, InterruptedException {
 		Process process = new ProcessBuilder("ovpn\\openvpn.exe", "--dev", "tap", "--remote", "127.0.0.1",
-				String.valueOf(local_listen_port), "udp").inheritIO().start();
+				String.valueOf(local_listen_port)).inheritIO().start();
 		process.waitFor();
 	}
 
