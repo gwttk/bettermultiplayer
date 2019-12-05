@@ -5,7 +5,7 @@ before_install:
     - pip3 -V
     - sudo apt-get install -y python3-pip
     - pip3 -V
-    - pip3 install --upgrade pip3
+    - pip3 install --upgrade pip
     - pip3 -V
 before_deploy:
     # create some env vars
