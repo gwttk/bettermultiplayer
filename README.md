@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/Immueggpain/bettermultiplayer.svg?branch=master)](https://travis-ci.com/Immueggpain/bettermultiplayer)
+
 ## QuickStart for Client
 * Make sure you have **[Java](https://jdk.java.net/11/) 8+** installed
 * [Download the zip file of latest release](https://github.com/Immueggpain/bettermultiplayer/releases). Unzip it
