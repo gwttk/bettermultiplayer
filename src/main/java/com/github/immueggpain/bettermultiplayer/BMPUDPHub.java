@@ -86,6 +86,7 @@ public class BMPUDPHub implements Callable<Void> {
 			if (player == null) {
 				player = new Player();
 				player.saddr = saddr;
+				activePlayers.put(saddr, player);
 			}
 			player.t = t;
 		}
