@@ -7,6 +7,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -140,7 +141,14 @@ public class BMPPeer implements Callable<Void> {
 				p.setData(recvBuf);
 				socketServer.receive(p);
 
-				byte[] decrypted = Util.decrypt(decrypter, secretKey, p.getData(), p.getOffset(), p.getLength());
+				byte[] decrypted;
+				try {
+					decrypted = Util.decrypt(decrypter, secretKey, p.getData(), p.getOffset(), p.getLength());
+				} catch (GeneralSecurityException e) {
+					System.err.println(e);
+					System.err.println("decrypt failed, skip this packet!");
+					continue;
+				}
 
 				p.setData(decrypted);
 				p.setAddress(loopback_addr);
