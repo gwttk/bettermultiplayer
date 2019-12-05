@@ -54,7 +54,6 @@ public class BMPUDPHub implements Callable<Void> {
 				p.setData(recvBuf);
 				socket.receive(p);
 				InetSocketAddress saddr = (InetSocketAddress) p.getSocketAddress();
-				System.out.println("recv from " + saddr);
 				updatePlayerInfo(saddr, System.currentTimeMillis());
 				broadcastPacket(saddr, p);
 			}
@@ -72,8 +71,12 @@ public class BMPUDPHub implements Callable<Void> {
 						.hasNext();) {
 					Entry<InetSocketAddress, Player> entry = iterator.next();
 					long last = entry.getValue().t;
-					if (now - last > 60000)
+					if (now - last > 60000) {
+						System.out.println("dead player: " + entry.getValue().saddr);
 						iterator.remove();
+					} else {
+						System.out.println("active player: " + entry.getValue().saddr);
+					}
 				}
 			}
 			Util.sleep(5000);
@@ -103,7 +106,6 @@ public class BMPUDPHub implements Callable<Void> {
 				p.setSocketAddress(dest);
 				try {
 					socket.send(p);
-					System.out.println("send to " + dest);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
