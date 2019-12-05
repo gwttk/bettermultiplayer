@@ -5,9 +5,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map.Entry;
 
 import com.github.immueggpain.bettermultiplayer.Launcher.ServerSettings;
@@ -46,8 +45,6 @@ public class BMPUDPHub {
 			byte[] recvBuf = new byte[4096];
 			DatagramPacket p = new DatagramPacket(recvBuf, recvBuf.length);
 
-			// setup daemon cleaning expired players
-
 			// recv loop
 			while (true) {
 				p.setData(recvBuf);
@@ -61,8 +58,21 @@ public class BMPUDPHub {
 		}
 	}
 
+	/** daemon cleaning expired players */
 	private void remove_expired_player_thread(int listen_port) {
-
+		while (true) {
+			synchronized (activePlayers) {
+				long now = System.currentTimeMillis();
+				for (Iterator<Entry<InetSocketAddress, Player>> iterator = activePlayers.entrySet().iterator(); iterator
+						.hasNext();) {
+					Entry<InetSocketAddress, Player> entry = iterator.next();
+					long last = entry.getValue().t;
+					if (now - last > 60000)
+						iterator.remove();
+				}
+			}
+			Util.sleep(5000);
+		}
 	}
 
 	private void updatePlayerInfo(InetSocketAddress saddr, long t) {
@@ -79,7 +89,7 @@ public class BMPUDPHub {
 	private void broadcastPacket(InetSocketAddress source, DatagramPacket p) {
 		synchronized (activePlayers) {
 			for (Entry<InetSocketAddress, Player> entry : activePlayers.entrySet()) {
-				InetSocketAddress dest = entry.getKey();
+				InetSocketAddress dest = entry.getValue().saddr;
 
 				if (dest.equals(source))
 					continue;
