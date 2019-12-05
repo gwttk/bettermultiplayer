@@ -6,9 +6,13 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.io.IOUtils;
 import com.sun.jna.platform.win32.Advapi32Util;
@@ -23,11 +27,16 @@ public class BMPPeer implements Callable<Void> {
 	public int serverPort;
 	@Option(names = { "-s", "--server" }, required = true, description = "server's name(ip or domain)")
 	public String serverName;
+	@Option(names = { "-w", "--password", "--pswd" }, required = true, description = "password as encryption key")
+	public String password;
 
 	/** socket communicating with ovpn */
 	private DatagramSocket socketOvpn;
 	/** socket communicating with server */
 	private DatagramSocket socketServer;
+	private Cipher encrypter;
+	private Cipher decrypter;
+	private SecretKeySpec secretKey;
 
 	@Override
 	public Void call() throws Exception {
@@ -60,10 +69,19 @@ public class BMPPeer implements Callable<Void> {
 			Thread.sleep(1000);
 		}
 
-		// setup udp redirect
-		Thread recvOvpnThread = Util.execAsync("recv_ovpn_thread", () -> recv_ovpn_thread(Launcher.LOCAL_PORT));
-		Thread recvServerThread = Util.execAsync("recv_server_thread",
-				() -> recv_server_thread(Launcher.LOCAL_OVPN_PORT));
+		// setup ciphers
+		System.out.println("password is [" + password + "]");
+		byte[] bytes = password.getBytes(StandardCharsets.UTF_8);
+		byte[] byteKey = new byte[16];
+		System.arraycopy(bytes, 0, byteKey, 0, Math.min(byteKey.length, bytes.length));
+		secretKey = new SecretKeySpec(byteKey, "AES");
+		// we use 2 ciphers because we want to support encrypt/decrypt full-duplex
+		String transformation = "AES/GCM/PKCS5Padding";
+		encrypter = Cipher.getInstance(transformation);
+		decrypter = Cipher.getInstance(transformation);
+
+		Util.execAsync("recv_ovpn_thread", () -> recv_ovpn_thread(Launcher.LOCAL_PORT));
+		Util.execAsync("recv_server_thread", () -> recv_server_thread(Launcher.LOCAL_OVPN_PORT));
 
 		// start ovpn
 		startOvpnProcess(Launcher.LOCAL_PORT);
@@ -92,6 +110,10 @@ public class BMPPeer implements Callable<Void> {
 			while (true) {
 				p.setData(recvBuf);
 				socketOvpn.receive(p);
+
+				byte[] encrypted = Util.encrypt(encrypter, secretKey, p.getData(), p.getOffset(), p.getLength());
+
+				p.setData(encrypted);
 				p.setAddress(serverIp);
 				p.setPort(serverPort);
 				socketServer.send(p);
@@ -117,6 +139,10 @@ public class BMPPeer implements Callable<Void> {
 			while (true) {
 				p.setData(recvBuf);
 				socketServer.receive(p);
+
+				byte[] decrypted = Util.decrypt(decrypter, secretKey, p.getData(), p.getOffset(), p.getLength());
+
+				p.setData(decrypted);
 				p.setAddress(loopback_addr);
 				p.setPort(local_ovpn_port);
 				socketOvpn.send(p);
