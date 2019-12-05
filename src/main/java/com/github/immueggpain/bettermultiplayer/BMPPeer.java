@@ -68,8 +68,9 @@ public class BMPPeer implements Callable<Void> {
 		// start ovpn
 		startOvpnProcess(Launcher.LOCAL_PORT);
 
-		recvOvpnThread.join();
-		recvServerThread.join();
+		// no need to join, if ovpn process exits, we exit too.
+		// recvOvpnThread.join();
+		// recvServerThread.join();
 
 		return null;
 	}
