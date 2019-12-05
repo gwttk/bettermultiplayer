@@ -23,6 +23,7 @@ public class BMPUDPHub implements Callable<Void> {
 		/** time of the last packet received from this player */
 		public long t;
 		public InetSocketAddress saddr;
+		public long pktCount = 0;
 	}
 
 	private HashMap<InetSocketAddress, Player> activePlayers = new HashMap<>();
@@ -67,15 +68,18 @@ public class BMPUDPHub implements Callable<Void> {
 		while (true) {
 			synchronized (activePlayers) {
 				long now = System.currentTimeMillis();
+				System.out.println("==player check==" + now);
 				for (Iterator<Entry<InetSocketAddress, Player>> iterator = activePlayers.entrySet().iterator(); iterator
 						.hasNext();) {
 					Entry<InetSocketAddress, Player> entry = iterator.next();
-					long last = entry.getValue().t;
+					Player playerInfo = entry.getValue();
+					long last = playerInfo.t;
 					if (now - last > 60000) {
-						System.out.println("dead player: " + entry.getValue().saddr);
+						System.out.println(String.format("dead player: %s, %d", playerInfo.saddr, playerInfo.pktCount));
 						iterator.remove();
 					} else {
-						System.out.println("active player: " + entry.getValue().saddr);
+						System.out
+								.println(String.format("active player: %s, %d", playerInfo.saddr, playerInfo.pktCount));
 					}
 				}
 			}
@@ -92,6 +96,7 @@ public class BMPUDPHub implements Callable<Void> {
 				activePlayers.put(saddr, player);
 			}
 			player.t = t;
+			player.pktCount++;
 		}
 	}
 
