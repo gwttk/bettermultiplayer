@@ -8,7 +8,7 @@ import picocli.CommandLine.HelpCommand;
 
 @Command(description = "use openvpn to create a virtual LAN for multiple PCs.", name = "bmp",
 		mixinStandardHelpOptions = true, version = Launcher.VERSTR,
-		subcommands = { HelpCommand.class, BMPUDPHub.class, BMPPeer.class, BMP2.class })
+		subcommands = { HelpCommand.class, BMPUDPHub.class, BMPPeer.class, BMPSimple.class })
 public class Launcher implements Callable<Void> {
 
 	public static final String VERSTR = "0.6.0";
