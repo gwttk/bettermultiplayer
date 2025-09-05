@@ -23,7 +23,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Help.Visibility;
 
 @Command(description = "BMP simple version", name = "bmp2", mixinStandardHelpOptions = true, version = Launcher.VERSTR)
-public class BMP2 implements Callable<Void> {
+public class BMPSimple implements Callable<Void> {
 
 	@Option(names = { "--server" }, required = false, description = "this is a server",
 			showDefaultValue = Visibility.NEVER)
