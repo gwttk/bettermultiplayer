@@ -11,7 +11,7 @@ import picocli.CommandLine.HelpCommand;
 		subcommands = { HelpCommand.class, BMPUDPHub.class, BMPPeer.class, BMPSimple.class })
 public class Launcher implements Callable<Void> {
 
-	public static final String VERSTR = "0.6.0";
+	public static final String VERSTR = "1.0.0";
 	public static final int LOCAL_PORT = 2233;
 	public static final int LOCAL_OVPN_PORT = 1199;
 
