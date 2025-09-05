@@ -8,12 +8,12 @@ import picocli.CommandLine.HelpCommand;
 
 @Command(description = "use openvpn to create a virtual LAN for multiple PCs.", name = "bmp",
 		mixinStandardHelpOptions = true, version = Launcher.VERSTR,
-		subcommands = { HelpCommand.class, BMPUDPHub.class, BMPPeer.class })
+		subcommands = { HelpCommand.class, BMPUDPHub.class, BMPPeer.class, BMP2.class })
 public class Launcher implements Callable<Void> {
 
 	public static final String VERSTR = "0.6.0";
 	public static final int LOCAL_PORT = 2233;
-	public static final int LOCAL_OVPN_PORT = 1194;
+	public static final int LOCAL_OVPN_PORT = 1199;
 
 	public static void main(String[] args) {
 		int exitCode = new CommandLine(new Launcher()).setCaseInsensitiveEnumValuesAllowed(true).execute(args);
