@@ -41,33 +41,16 @@ public class BMPPeer implements Callable<Void> {
 
 	@Override
 	public Void call() throws Exception {
+		System.out.println("version " + Launcher.VERSTR);
+
 		// check admin privilege
 		boolean isAdmin = isWinAdmin();
 		System.out.println("is admin? " + isAdmin);
 
 		// check tap device
 		if (!hasTapAdapter()) {
-			// make sure tap driver/adapter is installed!
-
-			// check if we have admin rights
-			if (!isAdmin) {
-				System.err.println("can't install tap adapter driver!");
-				System.err.println("please re-run with admin privilege!");
-				return null;
-			}
-
-			System.out.println("Please intall tap adapter");
-			Process process = new ProcessBuilder("ovpn\\tap-windows.exe").inheritIO().start();
-			int exitCode = process.waitFor();
-			if (exitCode != 0) {
-				System.err.println("install failed! exit code: " + exitCode);
-				System.err.println("Maybe you should try again?");
-				return null;
-			} else {
-				System.out.println("tap adapter installed ok!");
-			}
-			// wait a sec
-			Thread.sleep(1000);
+			System.err.println("Please intall tap adapter");
+			return null;
 		}
 
 		// setup ciphers
@@ -85,7 +68,7 @@ public class BMPPeer implements Callable<Void> {
 		Util.execAsync("recv_server_thread", () -> recv_server_thread(Launcher.LOCAL_OVPN_PORT));
 
 		// start ovpn
-		startOvpnProcess(Launcher.LOCAL_PORT);
+		startOvpnProcess(Launcher.LOCAL_PORT, Launcher.LOCAL_OVPN_PORT);
 
 		// no need to join, if ovpn process exits, we exit too.
 		// recvOvpnThread.join();
@@ -160,9 +143,11 @@ public class BMPPeer implements Callable<Void> {
 		}
 	}
 
-	private static void startOvpnProcess(int local_listen_port) throws IOException, InterruptedException {
-		Process process = new ProcessBuilder("ovpn\\openvpn.exe", "--dev", "tap", "--remote", "127.0.0.1",
-				String.valueOf(local_listen_port), "--ping", "5").inheritIO().start();
+	private static void startOvpnProcess(int local_listen_port, int ovpn_listen_port)
+			throws IOException, InterruptedException {
+		Process process = new ProcessBuilder("ovpn\\openvpn.exe", "--dev", "tap", "--local", "127.0.0.1", "--lport",
+				String.valueOf(ovpn_listen_port), "--remote", "127.0.0.1", String.valueOf(local_listen_port), "--ping",
+				"5").inheritIO().start();
 		process.waitFor();
 	}
 
