@@ -5,6 +5,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -31,6 +34,8 @@ public class BMPUDPHub implements Callable<Void> {
 
 	@Override
 	public Void call() throws Exception {
+		System.out.println("version " + Launcher.VERSTR);
+
 		Thread recvThread = Util.execAsync("recv_thread", () -> recv_thread(serverPort));
 		Thread removeExpiredPlayerThread = Util.execAsync("remove_expired_player_thread",
 				() -> remove_expired_player_thread());
@@ -65,10 +70,14 @@ public class BMPUDPHub implements Callable<Void> {
 
 	/** daemon cleaning expired players */
 	private void remove_expired_player_thread() {
+		DateTimeFormatter dtfmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'~'HH:mm:ss.SSSxxxxx'['VV']'")
+				.withZone(ZoneId.systemDefault());
+
 		while (true) {
 			synchronized (activePlayers) {
 				long now = System.currentTimeMillis();
-				System.out.println("==player check==" + now);
+				String fmtedDT = dtfmt.format(Instant.ofEpochMilli(now));
+				System.out.println("==player check== " + fmtedDT);
 				for (Iterator<Entry<InetSocketAddress, Player>> iterator = activePlayers.entrySet().iterator(); iterator
 						.hasNext();) {
 					Entry<InetSocketAddress, Player> entry = iterator.next();
