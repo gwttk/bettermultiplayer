@@ -22,7 +22,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Help.Visibility;
 
-@Command(description = "BMP 2nd gen", name = "bmp2", mixinStandardHelpOptions = true, version = Launcher.VERSTR)
+@Command(description = "BMP simple version", name = "bmp2", mixinStandardHelpOptions = true, version = Launcher.VERSTR)
 public class BMP2 implements Callable<Void> {
 
 	@Option(names = { "--server" }, required = false, description = "this is a server",
