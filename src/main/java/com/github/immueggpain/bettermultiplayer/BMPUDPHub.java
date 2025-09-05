@@ -92,7 +92,7 @@ public class BMPUDPHub implements Callable<Void> {
 					}
 				}
 			}
-			Util.sleep(5000);
+			Util.sleep(10000);
 		}
 	}
 
