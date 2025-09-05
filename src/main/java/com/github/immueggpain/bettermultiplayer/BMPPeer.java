@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import com.sun.jna.platform.win32.Advapi32Util;
 
@@ -55,7 +56,7 @@ public class BMPPeer implements Callable<Void> {
 
 		// setup ciphers
 		System.out.println("password is [" + password + "]");
-		byte[] bytes = password.getBytes(StandardCharsets.UTF_8);
+		byte[] bytes = DigestUtils.md5(password);
 		byte[] byteKey = new byte[16];
 		System.arraycopy(bytes, 0, byteKey, 0, Math.min(byteKey.length, bytes.length));
 		secretKey = new SecretKeySpec(byteKey, "AES");
