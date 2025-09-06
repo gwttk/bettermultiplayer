@@ -1,6 +1,7 @@
 ## QuickStart for Client
 * Make sure you have **Java 8+** installed
 * [Download the zip file of latest release](../../releases). Unzip it
+* install tap-windows in ovpn folder
 * Run client `java -jar .\bettermultiplayer.jar client -p <server_port> -s <server> -w <password>`.
 * Enjoy!
 
